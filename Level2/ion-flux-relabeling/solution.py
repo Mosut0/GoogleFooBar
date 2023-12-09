@@ -22,7 +22,7 @@ def solution(h, q):
 
     for i in range(len(q)):
         findParent(tree, q[i], -1, i)
-    print(ans)
+    return ans
 
 def postorder(height, nums):
     if height == 1:
@@ -33,4 +33,5 @@ def postorder(height, nums):
     node.left = postorder(height-1, nums)
     return node
 
-solution(5, [19, 14, 28])
+print(solution(5, [19, 14, 28]))
+print(solution(3, [7, 3, 5, 1]))

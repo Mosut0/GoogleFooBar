@@ -7,5 +7,6 @@ def solution(s):
         slices = s.count(substring)
         if slices * len(substring) == len(s):
             return slices
-        
-print(solution(sys.argv[1]))
+
+print(solution("abccbaabccba"))
+print(solution("abcabcabcabc"))

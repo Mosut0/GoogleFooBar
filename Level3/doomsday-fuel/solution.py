@@ -1,51 +1,54 @@
+from __future__ import division
 import math
 from fractions import Fraction
 
 maps = {}
 
 def transposeMatrix(m):
-    return map(list,zip(*m))
+    return map(list, zip(*m))
 
-def getMatrixMinor(m,i,j):
-    return [row[:j] + row[j+1:] for row in (m[:i]+m[i+1:])]
+def getMatrixMinor(m, i, j):
+    return [row[:j] + row[j+1:] for row in (m[:i] + m[i+1:])]
 
 def getMatrixDeternminant(m):
-    #base case for 2x2 matrix
+    # base case for 2x2 matrix
     if len(m) == 2:
-        return m[0][0]*m[1][1]-m[0][1]*m[1][0]
+        return m[0][0] * m[1][1] - m[0][1] * m[1][0]
 
     determinant = 0
     for c in range(len(m)):
-        determinant += ((-1)**c)*m[0][c]*getMatrixDeternminant(getMatrixMinor(m,0,c))
+        determinant += ((-1)**c) * m[0][c] * getMatrixDeternminant(getMatrixMinor(m, 0, c))
     return determinant
 
 def getMatrixInverse(m):
     determinant = getMatrixDeternminant(m)
-    #special case for 2x2 matrix:
+    # special case for 2x2 matrix:
     if len(m) == 2:
-        return [[m[1][1]/determinant, -1*m[0][1]/determinant],
-                [-1*m[1][0]/determinant, m[0][0]/determinant]]
+        return [
+            [m[1][1] / determinant, -1 * m[0][1] / determinant],
+            [-1 * m[1][0] / determinant, m[0][0] / determinant]
+        ]
 
-    #find matrix of cofactors
+    # find matrix of cofactors
     cofactors = []
     for r in range(len(m)):
         cofactorRow = []
         for c in range(len(m)):
-            minor = getMatrixMinor(m,r,c)
+            minor = getMatrixMinor(m, r, c)
             cofactorRow.append(((-1)**(r+c)) * getMatrixDeternminant(minor))
         cofactors.append(cofactorRow)
     cofactors = transposeMatrix(cofactors)
     for r in range(len(cofactors)):
         for c in range(len(cofactors)):
-            cofactors[r][c] = cofactors[r][c]/determinant
+            cofactors[r][c] = cofactors[r][c] / determinant
     return cofactors
 
 def find_absorption_state(matrix):
     for state in range(len(matrix)):
         if sum(matrix[state]) == 0:
-            maps.update({state : 0})
+            maps.update({state: 0})
         else:
-            maps.update({state : 1})
+            maps.update({state: 1})
 
 def find_RQ_matrix(matrix):
     r_matrix = []
@@ -85,17 +88,32 @@ def multiply_matrix(f_matrix, r_matrix):
                 fr_matrix[row][col] += f_matrix[row][n] * r_matrix[n][col]
     return fr_matrix
 
-def lcm(a, b):
-    return abs(a * b) // math.gcd(a, b)
+def compute_lcm(x, y):
+   if x > y:
+       greater = x
+   else:
+       greater = y
+
+   while(True):
+       if((greater % x == 0) and (greater % y == 0)):
+           lcm = greater
+           break
+       greater += 1
+
+   return lcm
 
 def find_lcm(arr):
     lcm_result = 1
     for num in arr:
         int_num = int(num * (10 ** 10)) // (10 ** 10)
-        lcm_result = lcm(lcm_result, int_num)
+        lcm_result = compute_lcm(lcm_result, int_num)
     return lcm_result
 
 def solution(m):
+    terminal = [not any(row) for row in m]
+    if terminal.count(True) == 1:
+        return [1, 1]
+
     find_absorption_state(m)
     r_matrix, q_matrix = find_RQ_matrix(m)
     i_matrix = find_i_matrix(len(q_matrix))
@@ -107,10 +125,9 @@ def solution(m):
         denominators.append(int(f.denominator))
     lcm = find_lcm(denominators)
     for i in range(len(fr_matrix[0])):
-        fr_matrix[0][i] = math.ceil(lcm * fr_matrix[0][i])
+        fr_matrix[0][i] = int(math.ceil(lcm * fr_matrix[0][i]))
     fr_matrix[0].append(lcm)
     return fr_matrix[0]
-
 
 print(solution(
     [
@@ -124,5 +141,11 @@ print(solution(
 ))
 
 print(solution(
-    [[0, 2, 1, 0, 0], [0, 0, 0, 3, 4], [0, 0, 0, 0, 0], [0, 0, 0, 0,0], [0, 0, 0, 0, 0]]
+    [
+        [0, 2, 1, 0, 0],
+        [0, 0, 0, 3, 4],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0,0],
+        [0, 0, 0, 0, 0]
+    ]
 ))
